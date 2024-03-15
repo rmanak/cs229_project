@@ -5,8 +5,9 @@ import sys
 symbol_pattern = re.compile(r"^(.*?) \(([A-Z]+(?:\.[A-Z]+)?)\)")
 
 # Regular expression pattern to extract the required information
+# EPS of -$0.39 misses by $0.04 | Revenue of $412.96M (-7.70% Y/Y) misses by $16.20M
 expectation_re = re.compile(
-    r"EPS of \$([\d.]+) (beats|misses) by \$([-\d.]+) \| Revenue of \$(\d+.\d+)([MB]) \(([-\d.]+)% Y/Y\) (beats|misses) by \$([\d.]+[MB])"
+    r"EPS of (-?)\$([\d.]+) (beats|misses) by \$([\d.]+) \| Revenue of (-?)\$(\d+.\d+)([MB]) \(([-\d.]+)% Y/Y\) (beats|misses) by \$([\d.]+[MB])"
 )
 
 def is_paragraph_break(current_line, next_line):
@@ -124,9 +125,11 @@ for file_path in sys.argv[1:]:
                 if match:
                     # Extracting captured values
                     (
+                        eps_minus,
                         eps_value,
                         eps_beats_misses,
                         eps_beats_by,
+                        revenue_minus,
                         revenue_value,
                         revenue_suffix,
                         revenue_yoy,
@@ -135,14 +138,14 @@ for file_path in sys.argv[1:]:
                     ) = match.groups()
 
                     # Add extracted data to the expectation_results dictionary
-                    output["expectation_results"]["eps"]["value"] = eps_value
+                    output["expectation_results"]["eps"]["value"] = eps_minus + eps_value
                     output["expectation_results"]["eps"]["beats_by"] = (
                         eps_beats_by
                         if eps_beats_misses == "beats"
                         else "-" + eps_beats_by
                     )
                     output["expectation_results"]["revenue"]["value"] = (
-                        revenue_value + revenue_suffix
+                        revenue_minus + revenue_value + revenue_suffix
                     )
                     output["expectation_results"]["revenue"]["YoY_percent"] = revenue_yoy
                     output["expectation_results"]["revenue"]["beats_by"] = (
