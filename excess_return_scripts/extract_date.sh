@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo "Symbol,Date"
+echo "Symbol,Date,Year"
 for x in *.txt; do
     symbol=$(echo "$x" | sed -E 's/.*\(([^)]*)\).*/\1/')
     date=$(awk '
